@@ -1,0 +1,101 @@
+package decorator_packages;
+import java.io.*;
+
+public interface DataSource {
+    void writeData(String data);
+    String readData();
+}
+
+public class FileDataSource implements DataSource {
+    private String fileName;
+
+    public FileDataSource(String fileName) {
+        this.fileName = fileName;
+    }
+
+    @Override
+    public void writeData(String data) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
+            writer.write(data);
+            System.out.println("Data written to file: " + data);
+        } catch (IOException e) {
+            System.out.println("Error writing data to file: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public String readData() {
+        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+            String line;
+            StringBuilder content = new StringBuilder();
+            while ((line = reader.readLine()) != null) {
+                content.append(line);
+            }
+            System.out.println("Data read from file: " + content.toString());
+            return content.toString();
+        } catch (IOException e) {
+            System.out.println("Error reading data from file: " + e.getMessage());
+        }
+        return null;
+    }
+}
+
+public abstract class DataSourceDecorator implements DataSource {
+    protected DataSource wrappee;
+
+    public DataSourceDecorator(DataSource wrappee) {
+        this.wrappee = wrappee;
+    }
+}
+
+public class EncryptionDecorator extends DataSourceDecorator {
+    public EncryptionDecorator(DataSource wrappee) {
+        super(wrappee);
+    }
+
+    @Override
+    public void writeData(String data) {
+        // Additional encryption logic
+        System.out.println("Encrypting data: " + data);
+        wrappee.writeData(data);
+    }
+
+    @Override
+    public String readData() {
+        // Additional decryption logic
+        return "Decrypted data: " + wrappee.readData();
+    }
+}
+
+public class CompressionDecorator extends DataSourceDecorator {
+    public CompressionDecorator(DataSource wrappee) {
+        super(wrappee);
+    }
+
+    @Override
+    public void writeData(String data) {
+        // Additional compression logic
+        System.out.println("Compressing data: " + data);
+        wrappee.writeData(data);
+    }
+
+    @Override
+    public String readData() {
+        // Additional decompression logic
+        return "Decompressed data: " + wrappee.readData();
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        String filePath = "E:\\SDUST\\3rd year\\2nd Semester\\Soft Design &Arch\\Exp\\Decorator Practice\\Data.txt";
+        DataSource dataSource = new FileDataSource(filePath);
+        dataSource = new EncryptionDecorator(dataSource);
+        dataSource = new CompressionDecorator(dataSource);
+
+        dataSource.writeData("This is some data to write");
+        String readData = dataSource.readData();
+
+        System.out.println("Read data: " + readData);
+    }
+}

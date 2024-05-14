@@ -1,0 +1,141 @@
+import java.io.*;
+
+// Interface for data source
+interface DataSource {
+    void writeData(String data);
+    String readData();
+}
+
+// Concrete implementation of data source using a file
+class FileDataSource implements DataSource {
+    private String filepath;
+
+    public FileDataSource(String filepath) {
+        this.filepath = filepath;
+    }
+
+    @Override
+    public void writeData(String data) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filepath))) {
+            writer.write(data);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public String readData() {
+        StringBuilder content = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(new FileReader(filepath))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                content.append(line).append("\n");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return content.toString();
+    }
+}
+
+// Abstract decorator class
+abstract class DataSourceDecorator implements DataSource {
+    protected DataSource wrappee;
+
+    public DataSourceDecorator(DataSource source) {
+        this.wrappee = source;
+    }
+
+    @Override
+    public void writeData(String data) {
+        wrappee.writeData(data);
+    }
+
+    @Override
+    public String readData() {
+        return wrappee.readData();
+    }
+}
+
+// Concrete decorator for encryption
+class EncryptionDecorator extends DataSourceDecorator {
+    public EncryptionDecorator(DataSource source) {
+        super(source);
+    }
+
+    @Override
+    public void writeData(String data) {
+        // Simulate encryption here
+        String encryptedData = encrypt(data);
+        super.writeData(encryptedData);
+    }
+
+    @Override
+    public String readData() {
+        // Simulate decryption here
+        String encryptedData = super.readData();
+        return decrypt(encryptedData);
+    }
+
+    private String encrypt(String data) {
+        // Simulate encryption algorithm
+        return "Encrypted: " + data;
+    }
+
+    private String decrypt(String data) {
+        // Simulate decryption algorithm
+        return data.substring("Encrypted: ".length());
+    }
+}
+
+// Concrete decorator for compression
+class CompressionDecorator extends DataSourceDecorator {
+    public CompressionDecorator(DataSource source) {
+        super(source);
+    }
+
+    @Override
+    public void writeData(String data) {
+        // Simulate compression here
+        String compressedData = compress(data);
+        super.writeData(compressedData);
+    }
+
+    @Override
+    public String readData() {
+        // Simulate decompression here
+        String compressedData = super.readData();
+        return decompress(compressedData);
+    }
+
+    private String compress(String data) {
+        // Simulate compression algorithm
+        return "Compressed: " + data;
+    }
+
+    private String decompress(String data) {
+        // Simulate decompression algorithm
+        return data.substring("Compressed: ".length());
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        // Define the file path
+        String filePath = "E:\\SDUST\\3rd year\\2nd Semester\\Soft Design &Arch\\Exp\\Decorator Practice\\Data.txt";
+        
+        // Create a FileDataSource object with the specified file path
+        FileDataSource dataSource = new FileDataSource(filePath);
+
+        // Create EncryptionDecorator and CompressionDecorator objects
+        EncryptionDecorator encryptor = new EncryptionDecorator(dataSource);
+        CompressionDecorator compressor = new CompressionDecorator(encryptor);
+
+        // Write data to file with encryption and compression
+        compressor.writeData("This is some data to write");
+
+        // Read data from file
+        String readData = compressor.readData();
+        System.out.println("Read Data: " + readData);
+    }
+}
