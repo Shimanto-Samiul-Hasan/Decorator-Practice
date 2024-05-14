@@ -8,8 +8,7 @@ This repository contains a Java project that demonstrates the implementation of 
 - [Key Features](#key-features)
 - [Project Structure](#project-structure)
 - [Development](#development)
-- [Contributing](#contributing)
-- [License](#license)
+
 
 ## Introduction
 
